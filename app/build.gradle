@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 34
+
+    defaultConfig {
+        applicationId "com.nikith_shetty.vgroup"
+        minSdkVersion 24
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    namespace 'com.nikith_shetty.vgroup'
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:0.21.0-beta01'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Butterknife is commented out as the version used is very old and not compatible with AGP 7+.
+    // It's recommended to migrate to ViewBinding.
+    // implementation 'com.jakewharton:butterknife:7.0.1'
+
+    // Stormpath SDK is deprecated and its services have been discontinued.
+    // You will need to migrate to a different authentication provider.
+    // implementation 'com.stormpath.sdk:stormpath-sdk-android:1.1.2'
+    // implementation 'com.stormpath.sdk:stormpath-sdk-android-ui:1.0.2'
+}
