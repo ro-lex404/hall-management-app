@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import adapters.RVAdapter_home;
@@ -28,7 +29,7 @@ public class placesFragment extends Fragment {
     private View view;
     private RecyclerView rv;
     private RVAdapter_home rvAdapterHome;
-    private List<EventData> hallList;
+    private List<EventData> hallList = new ArrayList<>(); // Initialize the list
     private Context context;
     private appTitleInterface appTitleInterface;
 
@@ -55,8 +56,7 @@ public class placesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_places, container, false);
-        loadHallsFromDatabase();
-        setUpRecyclerView();
+        setUpRecyclerView(); // Set up the RecyclerView first
         return view;
     }
 
@@ -66,9 +66,9 @@ public class placesFragment extends Fragment {
         if (appTitleInterface != null) {
             appTitleInterface.onSetTitle("Available Halls");
         }
-        // Refresh the list every time the screen is shown
+        // Load the latest data and update the adapter
         loadHallsFromDatabase();
-        rvAdapterHome.notifyDataSetChanged();
+        rvAdapterHome.updateData(hallList);
     }
 
     private void loadHallsFromDatabase() {
@@ -81,6 +81,7 @@ public class placesFragment extends Fragment {
     private void setUpRecyclerView() {
         rv = view.findViewById(R.id.recyclerView_places);
         rv.setHasFixedSize(true);
+        // Initialize adapter with an empty list. It will be updated in onResume.
         rvAdapterHome = new RVAdapter_home(hallList);
         rvAdapterHome.setListener(data -> {
             Global.setRecent(data);

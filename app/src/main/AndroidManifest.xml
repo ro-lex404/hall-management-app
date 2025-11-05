@@ -35,6 +35,12 @@
         <activity
             android:name=".AddHallActivity"
             android:exported="false" />
+        <activity
+            android:name=".RateUsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ContactUsActivity"
+            android:exported="false" />
         <activity android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">

@@ -8,12 +8,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, appTitleInterface {
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private Menu optionsMenu;
+    private boolean isOwnerMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +44,7 @@ public class MainActivity extends AppCompatActivity
         setUpHeaderView();
 
         if (savedInstanceState == null) {
-            navigationView.setCheckedItem(R.id.nav_home);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_area, homeFragment.newInstance())
-                    .commit();
-            // Initially hide search on home screen
-            if (optionsMenu != null) {
-                optionsMenu.findItem(R.id.action_search).setVisible(false);
-            }
+            switchToUserMode();
         }
     }
 
@@ -57,13 +53,47 @@ public class MainActivity extends AppCompatActivity
         navigationView.addHeaderView(headerView);
 
         Button signin = headerView.findViewById(R.id.button_signIn);
-        if (signin != null) {
-            signin.setOnClickListener(v -> {
-                if (drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                }
-                startActivity(new Intent(getApplicationContext(), LoginActivityNew.class));
-            });
+        signin.setOnClickListener(v -> {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+            startActivity(new Intent(getApplicationContext(), LoginActivityNew.class));
+        });
+
+        SwitchCompat ownerModeSwitch = headerView.findViewById(R.id.owner_mode_switch);
+        ownerModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                switchToOwnerMode();
+            } else {
+                switchToUserMode();
+            }
+            drawer.closeDrawer(GravityCompat.START);
+        });
+    }
+
+    private void switchToUserMode() {
+        isOwnerMode = false;
+        navigationView.getMenu().clear();
+        navigationView.inflateMenu(R.menu.activity_main_drawer);
+        navigationView.setCheckedItem(R.id.nav_home);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_area, homeFragment.newInstance())
+                .commit();
+        if (optionsMenu != null) {
+            optionsMenu.findItem(R.id.action_search).setVisible(false);
+        }
+    }
+
+    private void switchToOwnerMode() {
+        isOwnerMode = true;
+        navigationView.getMenu().clear();
+        navigationView.inflateMenu(R.menu.owner_drawer_menu);
+        navigationView.setCheckedItem(R.id.nav_owner_dashboard);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_area, OwnerDashboardFragment.newInstance())
+                .commit();
+        if (optionsMenu != null) {
+            optionsMenu.findItem(R.id.action_search).setVisible(true);
         }
     }
 
@@ -80,17 +110,14 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         this.optionsMenu = menu;
-        // Initially hide search on home screen
-        if (getSupportFragmentManager().findFragmentById(R.id.content_area) instanceof homeFragment) {
-            menu.findItem(R.id.action_search).setVisible(false);
-        }
+        // Hide search initially
+        menu.findItem(R.id.action_search).setVisible(false);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_logout) {
+        if (item.getItemId() == R.id.action_logout) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -100,17 +127,31 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         Fragment fragment = null;
         int id = item.getItemId();
-        MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
 
-        if (id == R.id.nav_home) {
-            fragment = homeFragment.newInstance();
-            searchItem.setVisible(false);
-        } else if (id == R.id.nav_account) {
-            fragment = accountsFragment.newInstance();
-            searchItem.setVisible(true);
-        } else if (id == R.id.nav_places) {
-            fragment = placesFragment.newInstance();
-            searchItem.setVisible(true);
+        // User Mode Navigation
+        if (!isOwnerMode) {
+            if (id == R.id.nav_home) {
+                fragment = homeFragment.newInstance();
+            } else if (id == R.id.nav_account) {
+                fragment = accountsFragment.newInstance();
+            } else if (id == R.id.nav_places) {
+                fragment = placesFragment.newInstance();
+            }
+        } else { // Owner Mode Navigation
+            if (id == R.id.nav_owner_dashboard) {
+                fragment = OwnerDashboardFragment.newInstance();
+            } else if (id == R.id.nav_add_hall) {
+                startActivity(new Intent(this, AddHallActivity.class));
+            }
+        }
+
+        // Common navigation for both modes
+        if (id == R.id.nav_share) {
+            Toast.makeText(this, "Share feature not yet implemented.", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_rate_us) {
+            startActivity(new Intent(this, RateUsActivity.class));
+        } else if (id == R.id.nav_contact_us) {
+            startActivity(new Intent(this, ContactUsActivity.class));
         }
 
         if (fragment != null) {

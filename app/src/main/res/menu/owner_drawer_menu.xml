@@ -3,25 +3,17 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_home"
-            android:icon="@android:drawable/ic_menu_mapmode"
-            android:title="Home" />
+            android:id="@+id/nav_owner_dashboard"
+            android:icon="@android:drawable/ic_menu_view"
+            android:title="Owner Dashboard" />
         <item
-            android:id="@+id/nav_account"
-            android:icon="@android:drawable/ic_menu_myplaces"
-            android:title="My Bookings" />
-        <item
-            android:id="@+id/nav_places"
-            android:icon="@android:drawable/ic_menu_directions"
-            android:title="Halls" />
+            android:id="@+id/nav_add_hall"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="Add New Hall" />
     </group>
 
     <item android:title="Communicate">
         <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
             <item
                 android:id="@+id/nav_rate_us"
                 android:icon="@android:drawable/btn_star_big_on"

@@ -3,6 +3,7 @@ package adapters;
 import android.net.Uri;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ import java.util.List;
 import models.EventData;
 
 /**
- * This adapter now displays Hall information, including the booking fee.
+ * This adapter now displays Hall information, including a preview image.
  */
 public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHolder> {
     private Listener listener;
@@ -32,6 +33,16 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
 
     public RVAdapter_home(List<EventData> list) {
         hallList = list;
+    }
+
+    public void updateData(List<EventData> newHallList) {
+        if (hallList != null) {
+            hallList.clear();
+            hallList.addAll(newHallList);
+        } else {
+            hallList = newHallList;
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -67,9 +78,17 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
 
         EventData hall = hallList.get(position);
 
+        // Load image safely
         String imageUriString = hall.getImageUrl();
-        if (imageUriString != null && !imageUriString.isEmpty()) {
-            hallImage.setImageURI(Uri.parse(imageUriString));
+        try {
+            if (imageUriString != null && !imageUriString.isEmpty()) {
+                hallImage.setImageURI(Uri.parse(imageUriString));
+            } else {
+                hallImage.setImageResource(R.mipmap.ic_launcher);
+            }
+        } catch (SecurityException e) {
+            Log.e("RVAdapter_home", "Permission denied for image URI: " + imageUriString, e);
+            hallImage.setImageResource(R.mipmap.ic_launcher); // Fallback to a default image
         }
 
         hallName.setText(hall.getEventName());
