@@ -7,16 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.nikith_shetty.vgroup.R;
+import com.hallbooking.app.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import models.EventData;
 
-/**
- * Created by Nikith_Shetty on 26/04/2016.
- */
 public class RVAdapter_places extends RecyclerView.Adapter<RVAdapter_places.ViewHolder> {
     private Listener listener;
     JSONArray jsonArray;

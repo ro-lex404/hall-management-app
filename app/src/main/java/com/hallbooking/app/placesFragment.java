@@ -1,44 +1,47 @@
-package com.nikith_shetty.vgroup;
+package com.hallbooking.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.google.gson.Gson;
+
 import java.util.List;
+
 import adapters.RVAdapter_home;
 import helper.classes.DatabaseHelper;
 import helper.classes.Global;
 import models.EventData;
 
 /**
- * This fragment now displays a list of halls loaded from the local SQLite database.
+ * This fragment now displays a list of all available halls from the database.
  */
-public class homeFragment extends Fragment {
+public class placesFragment extends Fragment {
 
     private View view;
-    private List<EventData> hallList;
     private RecyclerView rv;
     private RVAdapter_home rvAdapterHome;
+    private List<EventData> hallList;
     private Context context;
     private appTitleInterface appTitleInterface;
 
-    public homeFragment() {
+    public placesFragment() {
         // Required empty public constructor
     }
 
-    public static homeFragment newInstance() {
-        return new homeFragment();
+    public static placesFragment newInstance() {
+        return new placesFragment();
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
         if (context instanceof appTitleInterface) {
@@ -49,22 +52,12 @@ public class homeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_home, container, false);
-
-        // Load hall data directly from the database
+        view = inflater.inflate(R.layout.fragment_places, container, false);
         loadHallsFromDatabase();
         setUpRecyclerView();
-
         return view;
-    }
-
-    private void loadHallsFromDatabase() {
-        if (context != null) {
-            DatabaseHelper dbHelper = new DatabaseHelper(context);
-            hallList = dbHelper.getAllHalls();
-        }
     }
 
     @Override
@@ -78,13 +71,18 @@ public class homeFragment extends Fragment {
         rvAdapterHome.notifyDataSetChanged();
     }
 
+    private void loadHallsFromDatabase() {
+        if (context != null) {
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
+            hallList = dbHelper.getAllHalls();
+        }
+    }
+
     private void setUpRecyclerView() {
-        rv = view.findViewById(R.id.home_recyclerView);
+        rv = view.findViewById(R.id.recyclerView_places);
         rv.setHasFixedSize(true);
         rvAdapterHome = new RVAdapter_home(hallList);
         rvAdapterHome.setListener(data -> {
-            // This part still uses the old EventDetailsActivity, which is fine for now.
-            // It will just display the hall details.
             Global.setRecent(data);
             if (getActivity() != null) {
                 Intent intent = new Intent(getActivity(), EventDetailsActivity.class);
@@ -94,8 +92,5 @@ public class homeFragment extends Fragment {
         });
         rv.setAdapter(rvAdapterHome);
         rv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-    }
-
-    public interface homeFragmentListener {
     }
 }

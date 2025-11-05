@@ -2,9 +2,6 @@ package models;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Nikith_Shetty on 22/04/2016.
- */
 public class EventData {
     @SerializedName("_id")
     String _id;
@@ -13,11 +10,14 @@ public class EventData {
     @SerializedName("college")
     String college;
     @SerializedName("fee")
-    int fee;
+    int fee; // Restored to int
     @SerializedName("details")
     String details;
     @SerializedName("venue")
     Venue venue;
+
+    // New dedicated field for the image URI
+    private String imageUrl;
 
     public String getEventName() {
         return eventName;
@@ -65,5 +65,13 @@ public class EventData {
 
     public void set_id(String _id) {
         this._id = _id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

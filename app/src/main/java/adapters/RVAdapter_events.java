@@ -7,16 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.nikith_shetty.vgroup.R;
+import com.hallbooking.app.R;
 
 import java.util.List;
 
 import helper.classes.Global;
 import models.EventData;
 
-/**
- * Created by Nikith_Shetty on 14/04/2016.
- */
 public class RVAdapter_events extends RecyclerView.Adapter<RVAdapter_events.ViewHolder> {
     private Listener listener;
     private List<EventData> eventDataList;

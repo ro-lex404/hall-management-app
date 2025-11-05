@@ -1,25 +1,26 @@
 package adapters;
 
+import android.net.Uri;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nikith_shetty.vgroup.R;
+import com.hallbooking.app.R;
 
 import java.util.List;
 
 import models.EventData;
 
 /**
- * This adapter is responsible for displaying a list of items on the home screen.
- * The text has been changed to reflect 'Bookings' instead of 'Events'.
+ * This adapter now displays Hall information, including the booking fee.
  */
 public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHolder> {
     private Listener listener;
-    private List<EventData> eventDataList;
+    private List<EventData> hallList;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private CardView cardView;
@@ -30,7 +31,7 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
     }
 
     public RVAdapter_home(List<EventData> list) {
-        eventDataList = list;
+        hallList = list;
     }
 
     @Override
@@ -41,40 +42,47 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        createBookingCard(holder, position);
+        createHallCard(holder, position);
     }
 
     @Override
     public int getItemCount() {
-        return eventDataList.size();
+        if (hallList == null) {
+            return 0;
+        }
+        return hallList.size();
     }
 
-    private void createBookingCard(ViewHolder holder, final int position) {
+    private void createHallCard(ViewHolder holder, final int position) {
         CardView cardView = holder.cardView;
-        TextView purpose = cardView.findViewById(R.id.card_event_name);
-        TextView department = cardView.findViewById(R.id.card_event_college);
+        ImageView hallImage = cardView.findViewById(R.id.card_hall_image);
+        TextView hallName = cardView.findViewById(R.id.card_event_name);
+        TextView location = cardView.findViewById(R.id.card_event_venue);
+        TextView capacity = cardView.findViewById(R.id.card_event_details);
+        TextView contact = cardView.findViewById(R.id.card_event_college);
         TextView fee = cardView.findViewById(R.id.card_event_fee);
-        TextView details = cardView.findViewById(R.id.card_event_details);
-        TextView hall = cardView.findViewById(R.id.card_event_venue);
 
-        // Hide the unused coordinator info text view
         cardView.findViewById(R.id.card_event_coordInfo).setVisibility(View.GONE);
+        fee.setVisibility(View.VISIBLE);
 
-        EventData event = eventDataList.get(position);
+        EventData hall = hallList.get(position);
 
-        purpose.setText("Purpose: " + event.getEventName());
-        department.setText("Department: " + event.getCollege());
-        fee.setText("Fee: " + event.getFee());
-        details.setText("Notes: " + event.getDetails());
-        if (event.getVenue() != null) {
-            hall.setText("Hall: " + event.getVenue().getArea());
-        } else {
-            hall.setText("Hall: Not Assigned");
+        String imageUriString = hall.getImageUrl();
+        if (imageUriString != null && !imageUriString.isEmpty()) {
+            hallImage.setImageURI(Uri.parse(imageUriString));
         }
+
+        hallName.setText(hall.getEventName());
+        if (hall.getVenue() != null) {
+            location.setText(hall.getVenue().getArea() + ", " + hall.getVenue().getCity());
+        }
+        capacity.setText("Capacity: " + hall.getDetails());
+        contact.setText("Contact: " + hall.getCollege());
+        fee.setText("Booking Fee: " + hall.getFee());
 
         cardView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onClick(eventDataList.get(position));
+                listener.onClick(hallList.get(position));
             }
         });
     }

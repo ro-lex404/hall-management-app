@@ -1,7 +1,7 @@
-package com.nikith_shetty.vgroup;
+package com.hallbooking.app;
 
 /**
- * Created by Nikith_Shetty on 05/05/2016.
+ * Created by Nikith_Shetty on 26/04/2016.
  */
 public interface appTitleInterface {
     void onSetTitle(String title);

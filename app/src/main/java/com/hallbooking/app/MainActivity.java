@@ -1,9 +1,8 @@
-package com.nikith_shetty.vgroup;
+package com.hallbooking.app;
 
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -16,13 +15,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import helper.classes.Global;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, appTitleInterface {
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private Menu optionsMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,24 +38,24 @@ public class MainActivity extends AppCompatActivity
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Setup the header view once
         setUpHeaderView();
 
-        // Load the initial fragment only when the activity is first created
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.nav_home);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.content_area, homeFragment.newInstance())
                     .commit();
+            // Initially hide search on home screen
+            if (optionsMenu != null) {
+                optionsMenu.findItem(R.id.action_search).setVisible(false);
+            }
         }
     }
 
     private void setUpHeaderView() {
-        // Inflate the header view programmatically and add it to the NavigationView
         View headerView = LayoutInflater.from(this).inflate(R.layout.nav_header_main, navigationView, false);
         navigationView.addHeaderView(headerView);
 
-        // Now, find the button inside the inflated header
         Button signin = headerView.findViewById(R.id.button_signIn);
         if (signin != null) {
             signin.setOnClickListener(v -> {
@@ -81,6 +79,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        this.optionsMenu = menu;
+        // Initially hide search on home screen
+        if (getSupportFragmentManager().findFragmentById(R.id.content_area) instanceof homeFragment) {
+            menu.findItem(R.id.action_search).setVisible(false);
+        }
         return true;
     }
 
@@ -88,7 +91,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_logout) {
-            // Logout functionality needs to be reimplemented with a new authentication provider.
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -98,18 +100,17 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         Fragment fragment = null;
         int id = item.getItemId();
+        MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
 
         if (id == R.id.nav_home) {
             fragment = homeFragment.newInstance();
-        } else if (id == R.id.nav_events) {
-            fragment = eventFragment.newInstance();
+            searchItem.setVisible(false);
         } else if (id == R.id.nav_account) {
             fragment = accountsFragment.newInstance();
-        }
-        else if (id == R.id.nav_places) {
+            searchItem.setVisible(true);
+        } else if (id == R.id.nav_places) {
             fragment = placesFragment.newInstance();
-        } else if (id == R.id.nav_share) {
-            // Handle share action
+            searchItem.setVisible(true);
         }
 
         if (fragment != null) {

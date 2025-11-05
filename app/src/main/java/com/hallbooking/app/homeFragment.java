@@ -1,31 +1,30 @@
-package com.nikith_shetty.vgroup;
+package com.hallbooking.app;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * A simple {@link Fragment} subclass.
+ * This fragment now displays a simple welcome message.
  */
-public class accountsFragment extends Fragment {
+public class homeFragment extends Fragment {
 
     private appTitleInterface appTitleInterface;
 
-    public accountsFragment() {
+    public homeFragment() {
         // Required empty public constructor
     }
 
-    public static accountsFragment newInstance() {
-        return new accountsFragment();
+    public static homeFragment newInstance() {
+        return new homeFragment();
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof appTitleInterface) {
             appTitleInterface = (appTitleInterface) context;
@@ -35,26 +34,17 @@ public class accountsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_accounts, container, false);
+        // Inflate the new welcome layout for this fragment
+        return inflater.inflate(R.layout.fragment_home_new, container, false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (appTitleInterface != null) {
-            appTitleInterface.onSetTitle("My Bookings");
+            appTitleInterface.onSetTitle("Home");
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        appTitleInterface = null;
-    }
-
-    public interface accountFragmentListener {
     }
 }
