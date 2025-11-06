@@ -79,9 +79,7 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_area, homeFragment.newInstance())
                 .commit();
-        if (optionsMenu != null) {
-            optionsMenu.findItem(R.id.action_search).setVisible(false);
-        }
+        updateSearchIconVisibility();
     }
 
     private void switchToOwnerMode() {
@@ -92,8 +90,16 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_area, OwnerDashboardFragment.newInstance())
                 .commit();
+        updateSearchIconVisibility();
+    }
+
+    private void updateSearchIconVisibility() {
         if (optionsMenu != null) {
-            optionsMenu.findItem(R.id.action_search).setVisible(true);
+            MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
+            if (searchItem != null) {
+                // Search is visible in Owner mode, but not on the dashboard itself
+                searchItem.setVisible(isOwnerMode);
+            }
         }
     }
 
@@ -110,8 +116,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         this.optionsMenu = menu;
-        // Hide search initially
-        menu.findItem(R.id.action_search).setVisible(false);
+        updateSearchIconVisibility(); // Set initial visibility
         return true;
     }
 
@@ -160,8 +165,20 @@ public class MainActivity extends AppCompatActivity
                     .commit();
         }
 
+        // Update search icon visibility after navigation
+        updateSearchIconVisibility(id);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    
+    private void updateSearchIconVisibility(int menuItemId) {
+        if (optionsMenu != null) {
+            MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
+            if (searchItem != null) {
+                boolean isVisible = (menuItemId == R.id.nav_account || menuItemId == R.id.nav_places);
+                searchItem.setVisible(isVisible);
+            }
+        }
     }
 
     @Override
