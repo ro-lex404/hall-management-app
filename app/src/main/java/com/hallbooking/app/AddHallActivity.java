@@ -101,6 +101,12 @@ public class AddHallActivity extends AppCompatActivity {
             dbHelper.addHall(ownerId, newHall, imageFileName, ownerContact, ownerEmail);
 
             Toast.makeText(AddHallActivity.this, "Hall '" + name + "' has been added!", Toast.LENGTH_LONG).show();
+            
+            // Go back to the main activity, specifically to the browse halls page
+            Intent intent = new Intent(AddHallActivity.this, MainActivity.class);
+            intent.putExtra("open_browse_halls", true);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             finish();
         });
     }

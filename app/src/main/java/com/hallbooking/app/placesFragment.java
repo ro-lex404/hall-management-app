@@ -21,15 +21,12 @@ import helper.classes.DatabaseHelper;
 import helper.classes.Global;
 import models.EventData;
 
-/**
- * This fragment now displays a list of all available halls from the database.
- */
 public class placesFragment extends Fragment {
 
     private View view;
     private RecyclerView rv;
     private RVAdapter_home rvAdapterHome;
-    private List<EventData> hallList = new ArrayList<>(); // Initialize the list
+    private List<EventData> hallList = new ArrayList<>();
     private Context context;
     private appTitleInterface appTitleInterface;
 
@@ -56,7 +53,7 @@ public class placesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_places, container, false);
-        setUpRecyclerView(); // Set up the RecyclerView first
+        setUpRecyclerView();
         return view;
     }
 
@@ -66,22 +63,22 @@ public class placesFragment extends Fragment {
         if (appTitleInterface != null) {
             appTitleInterface.onSetTitle("Available Halls");
         }
-        // Load the latest data and update the adapter
         loadHallsFromDatabase();
-        rvAdapterHome.updateData(hallList);
     }
 
     private void loadHallsFromDatabase() {
         if (context != null) {
             DatabaseHelper dbHelper = new DatabaseHelper(context);
             hallList = dbHelper.getAllHalls();
+            if (rvAdapterHome != null) {
+                rvAdapterHome.updateData(hallList);
+            }
         }
     }
 
     private void setUpRecyclerView() {
         rv = view.findViewById(R.id.recyclerView_places);
         rv.setHasFixedSize(true);
-        // Initialize adapter with an empty list and the context.
         rvAdapterHome = new RVAdapter_home(hallList, context);
         rvAdapterHome.setListener(data -> {
             Global.setRecent(data);

@@ -47,7 +47,12 @@ public class MainActivity extends AppCompatActivity
         updateHeaderView();
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.content_area, homeFragment.newInstance()).commit();
+            if (getIntent().getBooleanExtra("open_browse_halls", false)) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_area, placesFragment.newInstance()).commit();
+                navigationView.setCheckedItem(R.id.nav_browse_halls);
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_area, homeFragment.newInstance()).commit();
+            }
         }
     }
 
