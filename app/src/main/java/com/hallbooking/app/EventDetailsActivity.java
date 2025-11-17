@@ -2,18 +2,29 @@ package com.hallbooking.app;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+
+import java.io.File;
+
+import helper.classes.DatabaseHelper;
 import models.EventData;
 import models.Venue;
 
 public class EventDetailsActivity extends AppCompatActivity {
+
+    private EventData hallData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,52 +37,88 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         ImageView hallImage = findViewById(R.id.details_hall_image);
         TextView hallName = findViewById(R.id.details_hall_name);
+        RatingBar averageRating = findViewById(R.id.details_average_rating);
         TextView hallLocation = findViewById(R.id.details_hall_location);
         TextView hallCapacity = findViewById(R.id.details_hall_capacity);
         TextView hallFee = findViewById(R.id.details_hall_fee);
         TextView ownerContact = findViewById(R.id.details_owner_contact);
         TextView ownerEmail = findViewById(R.id.details_owner_email);
+        RatingBar submitRating = findViewById(R.id.details_submit_rating);
+        Button submitRatingButton = findViewById(R.id.submit_rating_button);
         Button bookNowButton = findViewById(R.id.book_now_button);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String eventDataJson = extras.getString("data");
             if (eventDataJson != null) {
-                EventData data = new Gson().fromJson(eventDataJson, EventData.class);
-                populateUI(data, hallImage, hallName, hallLocation, hallCapacity, hallFee, ownerContact, ownerEmail);
+                hallData = new Gson().fromJson(eventDataJson, EventData.class);
+                populateUI(hallData, hallImage, hallName, averageRating, hallLocation, hallCapacity, hallFee, ownerContact, ownerEmail);
             }
         }
 
         bookNowButton.setOnClickListener(v -> {
-            // Redirect to the login page
-            Intent intent = new Intent(EventDetailsActivity.this, LoginActivityNew.class);
-            startActivity(intent);
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            long userId = prefs.getLong("user_id", -1);
+
+            if (userId != -1) {
+                DatabaseHelper dbHelper = new DatabaseHelper(this);
+                dbHelper.addBooking(userId, Long.parseLong(hallData.get_id()));
+                Toast.makeText(this, "Hall booked successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                // Not logged in, redirect to login
+                Intent intent = new Intent(EventDetailsActivity.this, LoginActivityNew.class);
+                startActivity(intent);
+            }
+        });
+
+        submitRatingButton.setOnClickListener(v -> {
+            float rating = submitRating.getRating();
+            if (rating > 0) {
+                new Thread(() -> {
+                    DatabaseHelper dbHelper = new DatabaseHelper(EventDetailsActivity.this);
+                    dbHelper.addRating(Long.parseLong(hallData.get_id()), rating);
+                    runOnUiThread(() -> {
+                        Toast.makeText(EventDetailsActivity.this, "Thank you for your rating!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                }).start();
+            } else {
+                Toast.makeText(this, "Please select a rating before submitting.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-    private void populateUI(EventData data, ImageView hallImage, TextView hallName, TextView hallLocation, TextView hallCapacity, TextView hallFee, TextView ownerContact, TextView ownerEmail) {
+    private void populateUI(EventData data, ImageView hallImage, TextView hallName, RatingBar averageRating, TextView hallLocation, TextView hallCapacity, TextView hallFee, TextView ownerContact, TextView ownerEmail) {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(data.getEventName());
         }
 
-        String imageUriString = data.getImageUrl();
-        if (imageUriString != null && !imageUriString.isEmpty()) {
-            hallImage.setImageURI(Uri.parse(imageUriString));
+        String imageFileName = data.getImageUrl();
+        if (imageFileName != null && !imageFileName.isEmpty()) {
+            File imageFile = new File(getFilesDir(), imageFileName);
+            if (imageFile.exists()) {
+                hallImage.setImageURI(Uri.fromFile(imageFile));
+            } else {
+                hallImage.setImageResource(R.mipmap.ic_launcher);
+            }
+        } else {
+            hallImage.setImageResource(R.mipmap.ic_launcher);
         }
 
         hallName.setText(data.getEventName());
+        averageRating.setRating(data.getAverageRating());
 
         Venue venue = data.getVenue();
         if (venue != null) {
             hallLocation.setText(venue.getArea() + ", " + venue.getCity());
-        } else {
-            hallLocation.setText("Location not available");
         }
 
         hallCapacity.setText("Capacity: " + data.getDetails());
         hallFee.setText("Fee: " + data.getFee());
         ownerContact.setText("Contact: " + data.getCollege());
-        ownerEmail.setVisibility(TextView.GONE);
+        ownerEmail.setText("Email: " + data.getOwnerEmail());
+        ownerEmail.setVisibility(View.VISIBLE);
     }
 
     @Override

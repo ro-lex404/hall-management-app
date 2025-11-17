@@ -28,6 +28,15 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
+            <RatingBar
+                android:id="@+id/details_average_rating"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:isIndicator="true"
+                android:numStars="5" />
+
             <TextView
                 android:id="@+id/details_hall_location"
                 android:layout_width="wrap_content"
@@ -48,6 +57,43 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Fee: 5000" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="#E0E0E0" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Submit Your Rating"
+                android:textStyle="bold" />
+
+            <RatingBar
+                android:id="@+id/details_submit_rating"
+                style="@style/YellowRatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:numStars="5"
+                android:stepSize="1.0" />
+
+            <Button
+                android:id="@+id/submit_rating_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text="Submit" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="#E0E0E0" />
 
             <TextView
                 android:layout_width="wrap_content"

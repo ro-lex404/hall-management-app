@@ -10,14 +10,23 @@ public class EventData {
     @SerializedName("college")
     String college;
     @SerializedName("fee")
-    int fee; // Restored to int
+    int fee;
     @SerializedName("details")
     String details;
     @SerializedName("venue")
     Venue venue;
 
-    // New dedicated field for the image URI
+    @SerializedName("imageUrl")
     private String imageUrl;
+
+    @SerializedName("ownerEmail")
+    private String ownerEmail;
+
+    // New fields for rating
+    @SerializedName("averageRating")
+    private float averageRating;
+    @SerializedName("ratingCount")
+    private int ratingCount;
 
     public String getEventName() {
         return eventName;
@@ -73,5 +82,29 @@ public class EventData {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
+    public float getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(float averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(int ratingCount) {
+        this.ratingCount = ratingCount;
     }
 }

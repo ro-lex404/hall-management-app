@@ -3,7 +3,6 @@ package helper.classes;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.google.android.material.navigation.NavigationView;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -17,8 +16,6 @@ import java.util.Set;
 
 import models.EventData;
 
-// Stormpath SDK is deprecated. All related code has been removed.
-
 public class Global extends Application {
     private static final String PREFERENCE_NAME = "Application_V_Group";
     private static final String TAG = "Global";
@@ -26,7 +23,6 @@ public class Global extends Application {
     private static List<EventData> recent = null;
     private static Set<EventData> item = null;
 
-    // Using a static IP is not recommended for production apps. Consider a configurable approach.
     public static final String ipAddr = "gentle-mesa-83442.herokuapp.com";
     public static final String GET_EVENTS_DATA = "http://" + ipAddr + "/events/getData";
     public static final String GET_PLACES_DATA = "http://" + ipAddr + "/events/getPlaces";
@@ -34,15 +30,10 @@ public class Global extends Application {
     public static final String baseUrl = "http://" + ipAddr + "";
     public static final String ACTION_DATA_RECEIVED = "dataReceived";
 
-    // Navigation View to set itemSelected
-    static NavigationView navigationView;
-
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        // Stormpath SDK is deprecated and has been removed.
-        // A new authentication provider needs to be implemented.
         Log.i(TAG, "Application context initialized.");
     }
 
@@ -55,7 +46,6 @@ public class Global extends Application {
             recent = new ArrayList<>();
             item = new HashSet<>();
         }
-        //check for redundant entries
         if (item.add(recently_used)) {
             recent.add(recently_used);
         }
@@ -65,14 +55,6 @@ public class Global extends Application {
         return recent;
     }
 
-    public static void setNavigationView(NavigationView view) {
-        navigationView = view;
-    }
-
-    public static NavigationView getNavigationView() {
-        return navigationView;
-    }
-
     public static void saveEventDataList(Context context, List<EventData> eventDataList) {
         if (context == null) return;
         SharedPreferences preferences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -80,7 +62,7 @@ public class Global extends Application {
         Gson gson = new Gson();
         String objectToJson = gson.toJson(eventDataList);
         editor.putString("eventDataList", objectToJson);
-        editor.apply(); // Use apply() for asynchronous saving
+        editor.apply();
     }
 
     public static List<EventData> loadEventDataList(Context context) {

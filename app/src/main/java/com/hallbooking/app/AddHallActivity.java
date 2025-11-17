@@ -1,6 +1,7 @@
 package com.hallbooking.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,11 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.UUID;
+
 import helper.classes.DatabaseHelper;
 import models.EventData;
 import models.Venue;
@@ -20,23 +26,13 @@ import models.Venue;
 public class AddHallActivity extends AppCompatActivity {
 
     private ImageView hallImagePreview;
-    private Uri selectedImageUri;
+    private Uri tempImageUri; // Temporary storage for the selected image URI
 
-    // Launcher for getting content from the gallery
     private final ActivityResultLauncher<String> mGetContent = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri != null) {
-                    try {
-                        // This is the crucial line that fixes the crash.
-                        // It takes persistent permission to read the image URI.
-                        final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                        getContentResolver().takePersistableUriPermission(uri, takeFlags);
-                    } catch (SecurityException e) {
-                        Log.e("AddHallActivity", "Failed to take persistent permission for URI", e);
-                    }
-
-                    selectedImageUri = uri;
+                    tempImageUri = uri;
                     hallImagePreview.setImageURI(uri);
                     hallImagePreview.setVisibility(View.VISIBLE);
                 }
@@ -46,6 +42,7 @@ public class AddHallActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_hall);
+        setTitle("Add New Hall");
 
         EditText hallName = findViewById(R.id.hall_name);
         EditText hallLocation = findViewById(R.id.hall_location);
@@ -54,11 +51,11 @@ public class AddHallActivity extends AppCompatActivity {
         EditText hallFee = findViewById(R.id.hall_fee);
         Button selectImageButton = findViewById(R.id.select_image_button);
         hallImagePreview = findViewById(R.id.hall_image_preview);
-        EditText ownerContact = findViewById(R.id.owner_contact);
-        EditText ownerEmail = findViewById(R.id.owner_email);
         Button addHallButton = findViewById(R.id.add_hall_button);
+        Button cancelButton = findViewById(R.id.cancel_button);
 
         selectImageButton.setOnClickListener(v -> mGetContent.launch("image/*"));
+        cancelButton.setOnClickListener(v -> finish());
 
         addHallButton.setOnClickListener(v -> {
             String name = hallName.getText().toString().trim();
@@ -66,9 +63,7 @@ public class AddHallActivity extends AppCompatActivity {
             String city = hallCity.getText().toString().trim();
             String capacity = hallCapacity.getText().toString().trim();
             String feeStr = hallFee.getText().toString().trim();
-            String imageUriString = (selectedImageUri != null) ? selectedImageUri.toString() : "";
-            String contact = ownerContact.getText().toString().trim();
-            String email = ownerEmail.getText().toString().trim();
+            String imageFileName = saveImageToInternalStorage(tempImageUri);
 
             if (name.isEmpty() || location.isEmpty() || city.isEmpty() || capacity.isEmpty() || feeStr.isEmpty()) {
                 Toast.makeText(AddHallActivity.this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
@@ -83,6 +78,16 @@ public class AddHallActivity extends AppCompatActivity {
                 return;
             }
 
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            long ownerId = prefs.getLong("user_id", -1);
+            String ownerContact = prefs.getString("user_contact", "");
+            String ownerEmail = prefs.getString("user_email", "");
+
+            if (ownerId == -1) {
+                Toast.makeText(this, "Error: Not logged in.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             EventData newHall = new EventData();
             Venue venue = new Venue();
             newHall.setEventName(name);
@@ -93,10 +98,31 @@ public class AddHallActivity extends AppCompatActivity {
             newHall.setVenue(venue);
 
             DatabaseHelper dbHelper = new DatabaseHelper(AddHallActivity.this);
-            dbHelper.addHall(newHall, imageUriString, contact, email);
+            dbHelper.addHall(ownerId, newHall, imageFileName, ownerContact, ownerEmail);
 
             Toast.makeText(AddHallActivity.this, "Hall '" + name + "' has been added!", Toast.LENGTH_LONG).show();
             finish();
         });
+    }
+
+    private String saveImageToInternalStorage(Uri uri) {
+        if (uri == null) return "";
+        String fileName = UUID.randomUUID().toString() + ".jpg";
+        File destinationFile = new File(getFilesDir(), fileName);
+
+        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+            if (inputStream == null) return "";
+            try (FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+                return fileName;
+            }
+        } catch (Exception e) {
+            Log.e("AddHallActivity", "Error saving image", e);
+            return "";
+        }
     }
 }

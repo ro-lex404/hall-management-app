@@ -68,30 +68,32 @@
             android:layout_height="150dp"
             android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
 
-        <EditText
-            android:id="@+id/owner_contact"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Owner Contact Number"
-            android:inputType="phone" />
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp">
 
-        <EditText
-            android:id="@+id/owner_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Owner Email ID"
-            android:inputType="textEmailAddress" />
+            <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Cancel" />
 
-        <Button
-            android:id="@+id/add_hall_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Add Hall to Listings" />
+            <Button
+                android:id="@+id/add_hall_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Add Hall" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

@@ -14,7 +14,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.acitvity_splash);
+        // This typo was the cause of the startup crash. Correcting it now.
+        setContentView(R.layout.activity_splash);
 
         // The app now starts directly into the main activity (User Mode).
         new Handler(Looper.getMainLooper()).postDelayed(() -> {

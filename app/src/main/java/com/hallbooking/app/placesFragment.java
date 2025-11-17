@@ -81,8 +81,8 @@ public class placesFragment extends Fragment {
     private void setUpRecyclerView() {
         rv = view.findViewById(R.id.recyclerView_places);
         rv.setHasFixedSize(true);
-        // Initialize adapter with an empty list. It will be updated in onResume.
-        rvAdapterHome = new RVAdapter_home(hallList);
+        // Initialize adapter with an empty list and the context.
+        rvAdapterHome = new RVAdapter_home(hallList, context);
         rvAdapterHome.setListener(data -> {
             Global.setRecent(data);
             if (getActivity() != null) {

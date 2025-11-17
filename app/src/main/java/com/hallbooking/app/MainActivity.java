@@ -1,20 +1,22 @@
 package com.hallbooking.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
@@ -22,8 +24,6 @@ public class MainActivity extends AppCompatActivity
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private Menu optionsMenu;
-    private boolean isOwnerMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        setupFab();
 
         drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -41,88 +43,72 @@ public class MainActivity extends AppCompatActivity
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        setUpHeaderView();
+        setupSidebar();
+        updateHeaderView();
 
         if (savedInstanceState == null) {
-            switchToUserMode();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_area, homeFragment.newInstance()).commit();
         }
     }
 
-    private void setUpHeaderView() {
-        View headerView = LayoutInflater.from(this).inflate(R.layout.nav_header_main, navigationView, false);
-        navigationView.addHeaderView(headerView);
-
-        Button signin = headerView.findViewById(R.id.button_signIn);
-        signin.setOnClickListener(v -> {
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-            startActivity(new Intent(getApplicationContext(), LoginActivityNew.class));
-        });
-
-        SwitchCompat ownerModeSwitch = headerView.findViewById(R.id.owner_mode_switch);
-        ownerModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                switchToOwnerMode();
-            } else {
-                switchToUserMode();
-            }
-            drawer.closeDrawer(GravityCompat.START);
-        });
+    private void setupFab() {
+        FloatingActionButton fab = findViewById(R.id.fab_chat);
+        if (fab != null) {
+            fab.setOnClickListener(view -> {
+                startActivity(new Intent(this, ChatActivity.class));
+            });
+        }
     }
 
-    private void switchToUserMode() {
-        isOwnerMode = false;
+    private void setupSidebar() {
         navigationView.getMenu().clear();
         navigationView.inflateMenu(R.menu.activity_main_drawer);
         navigationView.setCheckedItem(R.id.nav_home);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_area, homeFragment.newInstance())
-                .commit();
-        updateSearchIconVisibility();
     }
 
-    private void switchToOwnerMode() {
-        isOwnerMode = true;
-        navigationView.getMenu().clear();
-        navigationView.inflateMenu(R.menu.owner_drawer_menu);
-        navigationView.setCheckedItem(R.id.nav_owner_dashboard);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_area, OwnerDashboardFragment.newInstance())
-                .commit();
-        updateSearchIconVisibility();
-    }
+    private void updateHeaderView() {
+        View headerView = navigationView.getHeaderView(0);
+        if (headerView != null) { // Add a null check here
+            TextView userEmail = headerView.findViewById(R.id.user_email_text);
+            Button signInButton = headerView.findViewById(R.id.button_signIn);
 
-    private void updateSearchIconVisibility() {
-        if (optionsMenu != null) {
-            MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
-            if (searchItem != null) {
-                // Search is visible in Owner mode, but not on the dashboard itself
-                searchItem.setVisible(isOwnerMode);
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            boolean isLoggedIn = prefs.getBoolean("is_logged_in", false);
+
+            if (isLoggedIn) {
+                userEmail.setText(prefs.getString("user_email", ""));
+                userEmail.setVisibility(View.VISIBLE);
+                signInButton.setVisibility(View.GONE);
+            } else {
+                userEmail.setVisibility(View.GONE);
+                signInButton.setVisibility(View.VISIBLE);
+                signInButton.setOnClickListener(v -> {
+                    startActivity(new Intent(MainActivity.this, LoginActivityNew.class));
+                });
             }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        this.optionsMenu = menu;
-        updateSearchIconVisibility(); // Set initial visibility
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        if (!prefs.getBoolean("is_logged_in", false)) {
+            menu.findItem(R.id.action_logout).setVisible(false);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+
+            Intent intent = new Intent(this, SplashActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -133,26 +119,28 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
         int id = item.getItemId();
 
-        // User Mode Navigation
-        if (!isOwnerMode) {
-            if (id == R.id.nav_home) {
-                fragment = homeFragment.newInstance();
-            } else if (id == R.id.nav_account) {
-                fragment = accountsFragment.newInstance();
-            } else if (id == R.id.nav_places) {
-                fragment = placesFragment.newInstance();
+        if (id == R.id.nav_home) {
+            fragment = homeFragment.newInstance();
+        } else if (id == R.id.nav_browse_halls) {
+            fragment = placesFragment.newInstance();
+        } else if (id == R.id.nav_my_halls) {
+            if (isUserLoggedIn()) {
+                fragment = new MyHallsFragment();
+            } else {
+                startActivity(new Intent(this, LoginActivityNew.class));
             }
-        } else { // Owner Mode Navigation
-            if (id == R.id.nav_owner_dashboard) {
-                fragment = OwnerDashboardFragment.newInstance();
-            } else if (id == R.id.nav_add_hall) {
+        } else if (id == R.id.nav_my_bookings) {
+            if (isUserLoggedIn()) {
+                fragment = new MyBookingsFragment();
+            } else {
+                startActivity(new Intent(this, LoginActivityNew.class));
+            }
+        } else if (id == R.id.nav_add_hall) {
+            if (isUserLoggedIn()) {
                 startActivity(new Intent(this, AddHallActivity.class));
+            } else {
+                startActivity(new Intent(this, LoginActivityNew.class));
             }
-        }
-
-        // Common navigation for both modes
-        if (id == R.id.nav_share) {
-            Toast.makeText(this, "Share feature not yet implemented.", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_rate_us) {
             startActivity(new Intent(this, RateUsActivity.class));
         } else if (id == R.id.nav_contact_us) {
@@ -160,25 +148,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (fragment != null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_area, fragment)
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_area, fragment).commit();
         }
 
-        // Update search icon visibility after navigation
-        updateSearchIconVisibility(id);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    
-    private void updateSearchIconVisibility(int menuItemId) {
-        if (optionsMenu != null) {
-            MenuItem searchItem = optionsMenu.findItem(R.id.action_search);
-            if (searchItem != null) {
-                boolean isVisible = (menuItemId == R.id.nav_account || menuItemId == R.id.nav_places);
-                searchItem.setVisible(isVisible);
-            }
-        }
+
+    private boolean isUserLoggedIn() {
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        return prefs.getBoolean("is_logged_in", false);
     }
 
     @Override
