@@ -1,9 +1,12 @@
-Event Management App
---------------------------------------------------------------------------------
+Hall Management App<br>
+--------------------
+Allows for easy booking and management of halls on a mobile app. Allowing potential users to easily book halls and owners of halls to reach new customers.<br>
 
-Event management involves planning, organizing, spreading the word, registering the concerned parties with receipt of fee payment and finally conducting the event. There are many aspects of planning than the ones mentioned above, such as, getting volunteers, acquiring sponsors, collecting funds, setting up the venue if need be, campaigning, creating banners, spreading the word etc.
+Current features:<br>
+Authentication<br>
+Hall browsing<br>
+Adding new halls<br>
+Ratings for halls<br>
+Date wise booking of halls<br>
 
-In this project, there is a singular android application that can be installed on various android smartphones – which are most common in today’s scenario. There is a centralized server that hosts information about all the events in different colleges in the city. All the users of this application can get detailed information about the events happening in their own college or in their neighboring colleges.
-
-The client side code is written in Android, and the server side code is written in Node.js.
-Server side code is hosted here - https://github.com/NikithShetty/Event-Management-App_Server
+Made with Java and SQLite Database in Android Studio.
