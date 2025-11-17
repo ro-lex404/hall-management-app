@@ -28,6 +28,9 @@ public class EventData {
     @SerializedName("ratingCount")
     private int ratingCount;
 
+    // Field for booking date
+    private String bookingDate;
+
     public String getEventName() {
         return eventName;
     }
@@ -106,5 +109,13 @@ public class EventData {
 
     public void setRatingCount(int ratingCount) {
         this.ratingCount = ratingCount;
+    }
+
+    public String getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(String bookingDate) {
+        this.bookingDate = bookingDate;
     }
 }

@@ -1,6 +1,7 @@
 package com.hallbooking.app;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.util.Calendar;
 
 import helper.classes.DatabaseHelper;
 import models.EventData;
@@ -61,10 +64,7 @@ public class EventDetailsActivity extends AppCompatActivity {
             long userId = prefs.getLong("user_id", -1);
 
             if (userId != -1) {
-                DatabaseHelper dbHelper = new DatabaseHelper(this);
-                dbHelper.addBooking(userId, Long.parseLong(hallData.get_id()));
-                Toast.makeText(this, "Hall booked successfully!", Toast.LENGTH_SHORT).show();
-                finish();
+                showDatePickerDialog(userId);
             } else {
                 // Not logged in, redirect to login
                 Intent intent = new Intent(EventDetailsActivity.this, LoginActivityNew.class);
@@ -87,6 +87,27 @@ public class EventDetailsActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please select a rating before submitting.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showDatePickerDialog(long userId) {
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> {
+                    String selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+                    DatabaseHelper dbHelper = new DatabaseHelper(EventDetailsActivity.this);
+                    if (dbHelper.isBooked(Long.parseLong(hallData.get_id()), selectedDate)) {
+                        Toast.makeText(EventDetailsActivity.this, "This hall is already booked for the selected date.", Toast.LENGTH_LONG).show();
+                    } else {
+                        dbHelper.addBooking(userId, Long.parseLong(hallData.get_id()), selectedDate);
+                        Toast.makeText(EventDetailsActivity.this, "Hall booked successfully for " + selectedDate, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+        datePickerDialog.show();
     }
 
     private void populateUI(EventData data, ImageView hallImage, TextView hallName, RatingBar averageRating, TextView hallLocation, TextView hallCapacity, TextView hallFee, TextView ownerContact, TextView ownerEmail) {

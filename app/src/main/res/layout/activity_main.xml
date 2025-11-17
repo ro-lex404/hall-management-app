@@ -23,6 +23,7 @@
         app:itemTextColor="#FFFFFF"
         app:itemIconTint="#FFFFFF"
         app:itemBackground="@drawable/nav_item_background"
+        app:subheaderTextAppearance="@style/NavigationSubheaderText"
         android:fitsSystemWindows="true"
         app:menu="@menu/activity_main_drawer" />
 

@@ -24,6 +24,11 @@
         <item name="android:textColorSecondary">#BDBDBD</item> <!-- Light grey for sub-headers -->
     </style>
 
+    <!-- More specific and safer style for the Navigation Drawer sub-headers -->
+    <style name="NavigationSubheaderText" parent="@android:style/TextAppearance.Small">
+        <item name="android:textColor">#BDBDBD</item> <!-- Light grey -->
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />

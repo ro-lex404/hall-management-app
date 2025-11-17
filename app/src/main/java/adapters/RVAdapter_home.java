@@ -69,6 +69,7 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
         ImageView hallImage = cardView.findViewById(R.id.card_hall_image);
         TextView hallName = cardView.findViewById(R.id.card_event_name);
         RatingBar ratingBar = cardView.findViewById(R.id.card_average_rating);
+        TextView bookingDate = cardView.findViewById(R.id.card_booking_date);
         TextView location = cardView.findViewById(R.id.card_event_venue);
         TextView capacity = cardView.findViewById(R.id.card_event_details);
         TextView contact = cardView.findViewById(R.id.card_event_college);
@@ -93,9 +94,21 @@ public class RVAdapter_home extends RecyclerView.Adapter<RVAdapter_home.ViewHold
 
         hallName.setText(hall.getEventName());
         ratingBar.setRating(hall.getAverageRating());
-        
+
+        if (hall.getBookingDate() != null) {
+            bookingDate.setText("Booked for: " + hall.getBookingDate());
+            bookingDate.setVisibility(View.VISIBLE);
+        } else {
+            bookingDate.setVisibility(View.GONE);
+        }
+
         if (hall.getVenue() != null) {
-            location.setText(hall.getVenue().getArea() + ", " + hall.getVenue().getCity());
+            String area = hall.getVenue().getArea() != null ? hall.getVenue().getArea() : "";
+            String city = hall.getVenue().getCity() != null ? hall.getVenue().getCity() : "";
+            String locationText = area + ", " + city;
+            location.setText(locationText.equals(", ") ? "Location not available" : locationText);
+        } else {
+            location.setText("Location not available");
         }
         capacity.setText("Capacity: " + hall.getDetails());
         contact.setText("Contact: " + hall.getCollege());

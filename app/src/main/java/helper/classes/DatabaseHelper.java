@@ -15,8 +15,8 @@ import models.Venue;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "HallBooking.db";
-    // Version updated for major schema change
-    private static final int DATABASE_VERSION = 14;
+    // Version updated for the date booking feature
+    private static final int DATABASE_VERSION = 15;
 
     // Table Names
     private static final String TABLE_USERS = "users";
@@ -53,6 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Bookings Table Columns
     private static final String BOOKING_COLUMN_USER_ID = "user_id";
     private static final String BOOKING_COLUMN_HALL_ID = "hall_id";
+    private static final String BOOKING_COLUMN_DATE = "booking_date"; // New
 
 
     public DatabaseHelper(Context context) {
@@ -90,7 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + "("
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + BOOKING_COLUMN_USER_ID + " INTEGER,"
-                + BOOKING_COLUMN_HALL_ID + " INTEGER" + ")";
+                + BOOKING_COLUMN_HALL_ID + " INTEGER,"
+                + BOOKING_COLUMN_DATE + " TEXT" + ")";
 
         db.execSQL(CREATE_USERS_TABLE);
         db.execSQL(CREATE_HALLS_TABLE);
@@ -185,20 +187,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // --- Booking Methods ---
-    public void addBooking(long userId, long hallId) {
+    public void addBooking(long userId, long hallId, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(BOOKING_COLUMN_USER_ID, userId);
         values.put(BOOKING_COLUMN_HALL_ID, hallId);
+        values.put(BOOKING_COLUMN_DATE, date);
         db.insert(TABLE_BOOKINGS, null, values);
         db.close();
+    }
+
+    public boolean isBooked(long hallId, String date) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_BOOKINGS, new String[]{COLUMN_ID}, BOOKING_COLUMN_HALL_ID + "=? AND " + BOOKING_COLUMN_DATE + "=?", new String[]{String.valueOf(hallId), date}, null, null, null);
+        boolean isBooked = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return isBooked;
     }
 
     public List<EventData> getBookingsByUser(long userId) {
         List<EventData> hallList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         
-        String query = "SELECT T2.* FROM " + TABLE_BOOKINGS + " T1 JOIN " + TABLE_HALLS + " T2 ON T1."
+        String query = "SELECT T2.*, T1." + BOOKING_COLUMN_DATE + " FROM " + TABLE_BOOKINGS + " T1 JOIN " + TABLE_HALLS + " T2 ON T1."
                 + BOOKING_COLUMN_HALL_ID + " = T2." + COLUMN_ID + " WHERE T1." + BOOKING_COLUMN_USER_ID + " = " + userId;
 
         Cursor cursor = db.rawQuery(query, null);
@@ -219,6 +231,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 event.setOwnerEmail(cursor.getString(cursor.getColumnIndex(HALL_COLUMN_EMAIL)));
                 event.setAverageRating(cursor.getFloat(cursor.getColumnIndex(HALL_COLUMN_AVG_RATING)));
                 event.setRatingCount(cursor.getInt(cursor.getColumnIndex(HALL_COLUMN_RATING_COUNT)));
+                event.setBookingDate(cursor.getString(cursor.getColumnIndex(BOOKING_COLUMN_DATE)));
 
                 event.setVenue(venue);
                 hallList.add(event);
