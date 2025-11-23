@@ -9,4 +9,6 @@ Adding new halls<br>
 Ratings for halls<br>
 Date wise booking of halls<br>
 
+To add: chat b/w owner and user, calendar, search features
+
 Made with Java and SQLite Database in Android Studio.
